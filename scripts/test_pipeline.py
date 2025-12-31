@@ -1,12 +1,11 @@
 import torch
+from src.modules.subband import MagnitudeMaskEstimator
 
-from src.modules.subband_splitter import LearnableSubbandSplitter
-from src.modules.subband_gru import SubbandedTemporalGRU
-from src.modules.subband_fc_layers import FullyConnectedLayers
+# run `python -m scripts.test_pipeline` from project root to execute
 
 def get_magnitude_mask(x):
     """
-    Stage 2 of the audio processing pipeline: subband spliting -> GRU -> FC layers 
+    Stage 2 of the audio processing pipeline: subband spliting -> GRU -> FC layers -> mask estimation
 
     Args: 
         x (torch.Tensor): output from the pointwise conv of Stage 1;
@@ -14,48 +13,25 @@ def get_magnitude_mask(x):
 
     Returns:
         torch.Tensor: estimated magnitude mask;
-            shape: (batch, out_channels)
+            shape: (batch, out_channels, seq_len)
     """
-    IN_CHANNELS = 64  # output of the pointwise convolution
-    NUM_SUBBANDS = 2
-    HIDDEN_SIZE = 128
+    print(f'> beginning magnitude mask estimation...')
+    model = MagnitudeMaskEstimator()
 
-    # step 1 | split input into subbands dynamically
-    splitter = LearnableSubbandSplitter(in_channels=IN_CHANNELS, num_subbands=NUM_SUBBANDS)
-    subbands = splitter(x)
-    print(f'splitter output shape: {len(subbands)} subbands of shape {subbands[0].shape}')
-    
-    # step 2 | create one GRU per subband
-    grus = torch.nn.ModuleList([
-        SubbandedTemporalGRU(input_size=IN_CHANNELS, hidden_size=HIDDEN_SIZE)
-        for subband in range(NUM_SUBBANDS)
-    ])
-
-    gru_output = []
-
-    for i, subband_tensor in enumerate(subbands):
-        # transpose from shape (batch, channels, seq_len) to (batch, seq_len, channels)
-        gru_input = subband_tensor.transpose(1, 2)
-
-        # get output for each subbanded gru
-        output = grus[i](gru_input)
-        print(f'subbband #{i} gru shape: {output.shape}')
-        gru_output.append(output)
-
-    # step 3 | concatenate features
-    concatenated = torch.cat(gru_output, dim=-1)
-    print(f'concatenated features shape: {concatenated.shape}')
-
-    # step 4 | estimate magnitude mask with FC layers
-    total_features = concatenated.shape[-1]
-    fc_layers = FullyConnectedLayers(in_channels=total_features)
-    magnitude_mask = fc_layers(concatenated)
-
-    print(f'final mask shape: {magnitude_mask.shape}')
-    return magnitude_mask
+    # set model to evaluation mode so the batch norm uses pre-learned data each time 
+    model.eval()
+    # deactivate gradient calculations to save memory
+    with torch.no_grad():
+        magnitude_mask = model(x)
+  
+    # usable audio values should be non-negative; sigmoid bounds the output to [0,1]
+    print(f'> mask min value: {magnitude_mask.min().item():.4f}')
+    print(f'> mask max value: {magnitude_mask.max().item():.4f}')
+    # untrained model should produce values ~0.5
+    print(f'> mask mean: {magnitude_mask.mean().item():.4f}')
+    print(f'> final mask shape: {magnitude_mask.shape}')
 
 if __name__ == '__main__':
-    
-    # mock 1 second of 16kHz audio, with batch size 2 & 64 channels
+    # use batch size of 2 and 64 channels to mock 1 second of 16kHz audio
     x = torch.randn(2, 64, 16000)
     get_magnitude_mask(x)

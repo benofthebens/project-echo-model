@@ -5,13 +5,7 @@ class SubbandedTemporalGRU(nn.Module):
     """
     Perform sequential modelling on an input sequence
     """
-    def __init__(
-            self,
-            input_size=64,        # assumed output of pointwise conv layer
-            hidden_size=128,      # hyperparameter, will need finetuning
-            num_layers=2,         # specified in (Shetu et al.)
-            batch_first=True,     # expects (batch, sequence, features)
-            bidirectional=True):  # specified in (Shetu et al.)
+    def __init__(self, input_size, hidden_size, num_layers, batch_first=True, bidirectional=True):
 
         super().__init__()
 
@@ -35,7 +29,6 @@ class SubbandedTemporalGRU(nn.Module):
             torch.Tensor: features;
                 shape: (batch, seq_len, hidden_size * directions)
         """
-
         # h_n is the initial hidden state with shape (num_layers * directions, batch_size, hidden_size)
         output, h_n = self.gru(x)
         return output
