@@ -34,7 +34,7 @@ class CRN(nn.Module):
         self.FGRU = FGRU(in_channels=128, hidden_size=64, bidirectional=True, batch_first=True)
         self.pointwise = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1)
 
-        # subband gru and FC layers
+        # TODO: incorporate subband gru and FC layers
 
 
     def forward(self, x):
