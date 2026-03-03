@@ -35,3 +35,5 @@ if __name__ == '__main__':
     # use batch size of 2 and 64 channels to mock 1 second of 16kHz audio
     x = torch.randn(2, 64, 16000)
     get_magnitude_mask(x)
+
+    # add FGRU test here 
