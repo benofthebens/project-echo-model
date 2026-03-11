@@ -2,7 +2,6 @@ import torch
 
 # package containing all feature processing methods to be used in the pipeline
 
-
 def stft_waveform(waveform):
     stft = torch.stft(waveform, n_fft=512, hop_length=256, win_length=512,return_complex=True,
                       window=torch.hann_window(window_length=512,device=waveform.device))
@@ -22,7 +21,7 @@ def power_law_compression(x_real, x_imag,alpha):
 
     return real_comp, imag_comp, magnitude_comp, phase_comp
 
-def power_law_decompression(S_complex,alpha):
+def power_law_decompression(S_complex, alpha):
     real = torch.sign(S_complex.real) * torch.abs(S_complex.real)**(1/alpha)
     imag = torch.sign(S_complex.imag) * torch.abs(S_complex.imag)**(1/alpha)
 
