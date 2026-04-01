@@ -25,16 +25,20 @@ class FGRU(nn.Module):
 
     def forward(self, x):
         """
-        x: (batch, time, channels)
+        x: (batch, channels, freq, time)
         """
+
+        B, C, F, T = x.shape
+        out = x.permute(0, 2, 3, 1).reshape(B * F, T, C)
         # 1. Compress features
-        x_proj = self.pre_linear(x)
+        out = self.pre_linear(out)
 
         # 2. Run GRU over time dimension
-        gru_out, _ = self.gru(x_proj)
+        out, _ = self.gru(out)
 
         # 3. Expand GRU output back to original channel size
-        out = self.post_linear(gru_out)
+        out = self.post_linear(out)
+        out = out.reshape(B, F, T, C).permute(0, 3, 1, 2)  # reshape back to (batch, channels, freq, time)
 
         # 4. Fuse GRU features with original features
         out = self.activation(out + x)
