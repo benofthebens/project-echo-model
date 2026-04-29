@@ -7,6 +7,7 @@ def run_inference(input_path, output_path):
     # load denoiser model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Denoiser(alpha=0.3).to(device)
+    model.load_state_dict(torch.load("models/denoiser.pth", map_location=device))
     model.eval()
 
     # load audio file - waveform shape: [channels, samples]
@@ -38,8 +39,9 @@ def run_inference(input_path, output_path):
 
 if __name__ == "__main__":
     # absolute paths to input and output files - TODO change to relative paths if necessary
-    INPUT_FILE = "data/noisy/noisy.wav"
-    OUTPUT_FILE = "data/denoised/denoised.wav"
+    # INPUT_FILE = "data/noisy_testset_wav/noisy.wav"
+    INPUT_FILE = "data/noisy_testset_wav/noisy_testset_wav/p232_254.wav"
+    OUTPUT_FILE = "data/denoised/denoised_newwww.wav"
     
     try:
         run_inference(INPUT_FILE, OUTPUT_FILE)

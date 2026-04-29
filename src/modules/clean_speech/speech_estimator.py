@@ -9,7 +9,7 @@ class SpeechEstimator(nn.Module):
         self.alpha = alpha
 
         # Two Conv layers
-        self.conv1 = nn.Conv2d(4, 32, kernel_size=(1,3), padding=(0,1)) # TODO - input channels = 4 works on test_Pipeline but input channels = 2 is needed for real audio
+        self.conv1 = nn.Conv2d(2, 32, kernel_size=(1,3), padding=(0,1)) # TODO - input channels = 4 works on test_Pipeline but input channels = 2 is needed for real audio
         self.conv2 = nn.Conv2d(32, 32, kernel_size=(1,3), padding=(0,1))
 
         # Pointwise conv layer to restore desired output shape
@@ -29,7 +29,6 @@ class SpeechEstimator(nn.Module):
         mask_real = mask[:, 0, :, :]
         mask_imag = mask[:, 1, :, :]
 
-        
         return torch.complex(mask_real, mask_imag)
 
 

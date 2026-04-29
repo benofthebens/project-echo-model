@@ -28,13 +28,13 @@ class Denoiser(nn.Module):
 
     def forward(self, x):
         # step 1 | input preprocessing 
-
+        print(f'maximum value: {x.max()}, minimum value: {x.min()}')
         # extract waveform from spectrogram and apply power-law compression
         x_real, x_imag = features.stft_waveform(x)
         
         real_comp, imag_comp, magnitude_comp, phase_comp = features.power_law_compression(x_real, x_imag, alpha=self.alpha)
 
-        # Store original frequency resolution (257) and time frames (T)
+        # store original frequency resolution (257) and time frames (T)
         B, F_orig, T_orig = magnitude_comp.shape
 
         # TODO: implement reorientation of features
@@ -84,4 +84,7 @@ class Denoiser(nn.Module):
         # apply power law decompression to the output of the speech estimator
         S_final = features.power_law_decompression(S_hat, alpha=self.alpha)
 
-        return torch.istft(S_final, n_fft=512, hop_length=256, window=torch.hann_window(512).to(x.device), length=x.shape[-1])
+        S_final_inverse = torch.istft(S_final, n_fft=512, hop_length=256, window=torch.hann_window(512).to(x.device), length=x.shape[-1])
+
+        # test whether increasing magnitude helps make audio audible
+        return S_final_inverse * 132
