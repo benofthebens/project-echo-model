@@ -1,3 +1,9 @@
+# Datasets
+data/noisy_trainset_wav/
+data/clean_trainset_wav/
+data/noisy_testset_wav/
+data/clean_testset_wav/
+
 # Jupyter
 notebooks/
 .ipynb_checkpoints/
