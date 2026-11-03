@@ -29,6 +29,6 @@ class SubbandedTemporalGRU(nn.Module):
             torch.Tensor: features;
                 shape: (batch, seq_len, hidden_size * directions)
         """
-        # h_n is the initial hidden state with shape (num_layers * directions, batch_size, hidden_size)
+        # h_n is the final hidden state with shape (num_layers * directions, batch_size, hidden_size)
         output, h_n = self.gru(x)
         return output

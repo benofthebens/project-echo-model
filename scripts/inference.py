@@ -4,6 +4,8 @@ import torchaudio.transforms as T
 import torchaudio.functional as F
 from src.modules.denoiser import Denoiser
 
+from audio_utils import load_audio, save_audio, TARGET_SR
+
 
 def high_pass_filter(waveform, sample_rate):
     cutoff_freq = 20.0 # in Hz
@@ -17,7 +19,7 @@ def run_inference(input_path, output_path):
     model.eval()
 
     # load audio file - waveform shape: [channels, samples]
-    waveform, sample_rate = torchaudio.load(input_path)
+    waveform, sample_rate = load_audio(input_path)
     waveform = waveform.to(device)
 
     print(f"> loaded {input_path} | sample rate: {sample_rate} | shape: {waveform.shape}")
@@ -41,14 +43,14 @@ def run_inference(input_path, output_path):
 
     # save output and ensure it's on CPU for saving
     denoised_waveform = denoised_waveform.cpu()
-    torchaudio.save(output_path, denoised_waveform, 16000)
+    save_audio(output_path, denoised_waveform, TARGET_SR)
     print(f"> successful - denoised audio saved to: {output_path}")
 
 if __name__ == "__main__":
     # absolute paths to input and output files - TODO change to relative paths if necessary
     # INPUT_FILE = "data/noisy_testset_wav/noisy.wav"
 
-    INPUT_FILE = "data/noisy_testset_wav/noisy_testset_wav/p232_254.wav"
+    INPUT_FILE = "data/noisy_testset_wav/p232_254.wav"
     OUTPUT_FILE = "data/denoised/denoised_p232_254.wav"
     
     try:
