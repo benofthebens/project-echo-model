@@ -39,11 +39,13 @@ The stage 1a output `(B, 64, 32, T')` is flattened to `(B, 64, 32·T')` and pass
 
 The output is averaged over the pooled frequency axis and interpolated back to `T` frames, giving a `(B, 1, 257, T)` mask.
 
-### Stage 2: complex speech estimation
+### Stage 2: Complex speech estimation
 
 1. **Intermediate features:** the mask and noisy phase form a real/imaginary pair, `mask·cos(phase)` and `mask·sin(phase)`, stacked into `(B, 2, 257, T)`.
 2. **`SpeechEstimator`:** two `1x3` convolutions (2 → 32 → 32 channels, ReLU) and a pointwise convolution (32 → 2) output a complex mask `M`.
-3. **Clean speech reconstruction**: `S_hat = |X_comp| · tanh(|M|) · e^{j(φ_noisy + φ_M)}`, where `|X_comp|` is the compressed noisy magnitude.
+3. **Clean speech reconstruction**, where $|X_{comp}|$ is the compressed noisy magnitude:
+
+   $$\hat{S} = |X_{comp}| \cdot \tanh(|M|) \cdot e^{j(\phi_{noisy} + \phi_M)}$$
 
 ### Output
 
@@ -118,7 +120,7 @@ data/
 
 Denoised static audio samples will be stored in `data/denoised`. `data/` is gitignored, so the dataset must be downloaded individually by each user.
 
-## Execution & Testing
+## Execution
 
 Run all commands from the project root.
 
