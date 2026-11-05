@@ -1,4 +1,4 @@
-# Project Echo: A Speech Enhancement Deep Learning model
+# Project Echo: A Speech Enhancement Deep Learning Model
 
 A deep learning model that removes background noise from speech audio, as part of our aim to create an AI-powered hearing aid.
 
@@ -20,7 +20,7 @@ project-echo-model/
 │   └── test_pipeline.py      # tests the pipeline on mock audio
 ├── train.py                  # training script
 ├── audio_utils.py            # load_audio / save_audio helpers, TARGET_SR
-├── models/                   # trained weights (denoiser.pth currently only trained on a subset of the dataset)
+├── models/                   # trained weights (denoiser_v1.pth currently only trained on subset of dataset, denoiser.pth to be overridden)
 ├── data/                     # datasets (not committed)
 ├── assets/                   # images (for README)
 ├── requirements.txt
@@ -65,7 +65,7 @@ The input is converted to 16 kHz mono internally, and the output is saved at
 ### Training
 
 ```bash
-python train.py
+python -m train
 ```
 By default, this script trains the model on the first 100 files (`MAX_FILES`) of the training set for 10 `EPOCHS` and prints the average loss per epoch. The aim this year is to train on the full set of the training data. Weights are saved to `models/denoiser.pth`, overwriting the existing model (the initial version of the model has been backed up under `models/denoiser_v1.pth`).
 
@@ -94,7 +94,7 @@ The waveform is converted to a complex STFT (512-point FFT, hop 256, 257 bins). 
 Input: compressed magnitude `(B, 1, 257, T)`.
 
 - Four depthwise convolution blocks (channels 1 → 128), with 2x2 max pooling after blocks 2-4 (frequency 257 → 32)
-- `FGRU`: per frequency bin, a bidirectional GRU over time (64 hidden units) between two linear layers, with a residual connection and ReLU
+- `FGRU`: per frequency bin, a bidirectional GRU over time (64 hidden units) between two linear layers, with ReLU
 - Pointwise convolution (128 → 64 channels)
 
 ### Stage 1b: `MagnitudeMaskEstimator`
