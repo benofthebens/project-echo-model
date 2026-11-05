@@ -25,10 +25,11 @@ def test_full_pipeline():
     # create mock audio (1 second of 16kHz audio, batch size of 2)
     x_waveform = torch.randn(2, 16000)
 
-    print(f'> input waveform shape: {x_waveform}')
+    print(f'> input waveform shape: {x_waveform.shape}')
     print(f'> input waveform stats - min: {x_waveform.min().item():.4f}, max: {x_waveform.max().item():.4f}, mean: {x_waveform.mean().item():.4f}')
 
     with torch.no_grad():
+        output = None
         try:
             output = model(x_waveform)
             print(f'> full pipeline output shape: {output.shape}')
@@ -45,16 +46,16 @@ def test_full_pipeline():
 
         except Exception as e:
             print(f'> error during full pipeline execution: {e}')
-            raise e
-        
-        finally:
-            print(f'> output waveform stats - min: {output.min().item():.4f}, max: {output.max().item():.4f}, mean: {output.mean().item():.4f}')
-            print(f'> {output}')
+            raise
 
+        finally:
+            if output is not None:
+                print(f'> output waveform stats - min: {output.min().item():.4f}, max: {output.max().item():.4f}, mean: {output.mean().item():.4f}')
+                print(f'> {output}')
 
 def get_magnitude_mask(x):
     """
-    Stage 2 of the audio processing pipeline: subband spliting -> GRU -> FC layers -> mask estimation
+    Stage 1b of the audio processing pipeline: subband spliting -> GRU -> FC layers -> mask estimation
 
     Args: 
         x (torch.Tensor): output from the pointwise conv of Stage 1;

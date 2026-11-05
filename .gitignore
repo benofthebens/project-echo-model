@@ -4,6 +4,11 @@ data/clean_trainset_wav/
 data/noisy_testset_wav/
 data/clean_testset_wav/
 
+# Models
+models/*
+!models/denoiser.pth
+!models/denoiser_v1.pth
+
 # Jupyter
 notebooks/
 .ipynb_checkpoints/

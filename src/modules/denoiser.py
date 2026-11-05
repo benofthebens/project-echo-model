@@ -74,7 +74,8 @@ class Denoiser(nn.Module):
         # if mask.shape[2] != magnitude_comp.shape[1]:
         #   mask = Funct.interpolate(mask, size=(magnitude_comp.shape[1], T), mode='bilinear', align_corners=False)
 
-        concat_Y = features.intermediate_feature_construction(mask, phase_comp)
+        # unsqueeze phase_comp to match the shape of mask (B, 1, 257, T) instead of (B, B, 257, T)
+        concat_Y = features.intermediate_feature_construction(mask, phase_comp.unsqueeze(1))
       
         clean_complex = self.speech_estimator(concat_Y)
 

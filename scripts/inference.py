@@ -1,7 +1,15 @@
 import torch
 import torchaudio
 import torchaudio.transforms as T
+import torchaudio.functional as F
 from src.modules.denoiser import Denoiser
+
+from audio_utils import load_audio, save_audio, TARGET_SR
+
+
+def high_pass_filter(waveform, sample_rate):
+    cutoff_freq = 20.0 # in Hz
+    return F.highpass_biquad(waveform, sample_rate, cutoff_freq)
 
 def run_inference(input_path, output_path):
     # load denoiser model
@@ -11,12 +19,12 @@ def run_inference(input_path, output_path):
     model.eval()
 
     # load audio file - waveform shape: [channels, samples]
-    waveform, sample_rate = torchaudio.load(input_path)
+    waveform, sample_rate = load_audio(input_path)
     waveform = waveform.to(device)
 
     print(f"> loaded {input_path} | sample rate: {sample_rate} | shape: {waveform.shape}")
 
-    # preprocessing (mModel expects 16kHz mono [batch, samples]), coonverting to mono if stereo
+    # preprocessing (model expects 16kHz mono [batch, samples]), coonverting to mono if stereo
     if waveform.shape[0] > 1:
         waveform = torch.mean(waveform, dim=0, keepdim=True)
 
@@ -26,22 +34,24 @@ def run_inference(input_path, output_path):
         waveform = resampler(waveform)
         print(f"> resampled to 16000Hz")
 
-
     with torch.no_grad():
         print("> processing audio...")
         # model expects [batch, samples but torchaudio gives [1, samples], so we can just pass it directly as a batch of 1
         denoised_waveform = model(waveform)
 
+    denoised_waveform = high_pass_filter(denoised_waveform, sample_rate=sample_rate)
+
     # save output and ensure it's on CPU for saving
     denoised_waveform = denoised_waveform.cpu()
-    torchaudio.save(output_path, denoised_waveform, 16000)
+    save_audio(output_path, denoised_waveform, TARGET_SR)
     print(f"> successful - denoised audio saved to: {output_path}")
 
 if __name__ == "__main__":
     # absolute paths to input and output files - TODO change to relative paths if necessary
     # INPUT_FILE = "data/noisy_testset_wav/noisy.wav"
-    INPUT_FILE = "data/noisy_testset_wav/noisy_testset_wav/p232_254.wav"
-    OUTPUT_FILE = "data/denoised/denoised_newwww.wav"
+
+    INPUT_FILE = "data/noisy_testset_wav/p232_254.wav"
+    OUTPUT_FILE = "data/denoised/denoised_p232_254.wav"
     
     try:
         run_inference(INPUT_FILE, OUTPUT_FILE)
