@@ -7,7 +7,7 @@ from src.modules.denoiser import Denoiser
 from audio_utils import load_audio, TARGET_SR
 
 # set to True for quick test run with a small subset of the dataset
-TEST_RUN = False 
+TEST_RUN = True 
 MAX_FILES = 4 if TEST_RUN else 100
 EPOCHS = 2 if TEST_RUN else 10
 MODEL_PATH = "models/denoiser_test.pth" if TEST_RUN else "models/denoiser.pth"
