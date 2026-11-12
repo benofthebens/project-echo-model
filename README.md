@@ -147,7 +147,7 @@ $\hat{S}$ is power-law decompressed (exponent $1/\alpha$) and converted to a wav
 
 - **Under-trained model.** The model (as of November 2026) has been trained on only the first 100 of the 11K+ training samples, so is likely biased. More training on the full set is planned.
 - **Audio I/O uses `soundfile`**, not `torchaudio.load/save`, to temporarily avoid the TorchCodec and FFmpeg dependency on Windows.
-- **Not real-time.** The stage 1 `FGRU` is bidirectional over time, so each output frame depends on future frames and the model currently can't process audio as a live stream.
+- **Not real-time.** The mask estimator GRUs run over a flattened frequency-time sequence, so each output depends on the whole clip. The stage 1a convolutions (symmetric 3x3 kernels, 2x2 max pooling) also need future frames.
 
 ## References
 

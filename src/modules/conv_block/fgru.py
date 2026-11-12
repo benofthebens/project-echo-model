@@ -29,7 +29,7 @@ class FGRU(nn.Module):
         """
 
         B, C, F, T = x.shape
-        out = x.permute(0, 2, 3, 1).reshape(B * F, T, C)
+        out = x.permute(0, 3, 2, 1).reshape(B * T, F, C)
         # 1. Compress features
         out = self.pre_linear(out)
 
